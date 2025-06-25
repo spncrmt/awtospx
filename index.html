@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>AI Image Generator</title>
+</head>
+<body>
+  <h2>Create Your Image</h2>
+  <form id="imageForm">
+    <input name="scene" placeholder="Scene" /><br />
+    <input name="style" placeholder="Style (e.g. oil painting)" /><br />
+    <input name="mood" placeholder="Mood (e.g. dramatic)" /><br />
+    <input name="characters" placeholder="Characters" /><br />
+    <input name="background" placeholder="Background" /><br />
+    <input name="color_palette" placeholder="Color Palette" /><br />
+    <input name="realism" placeholder="Realism (e.g. photorealistic)" /><br />
+    <button type="submit">Generate Image</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById("imageForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+
+      const res = await fetch("https://your-n8n-webhook.com/webhook/image-gen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const out = await res.json();
+      document.getElementById("result").innerHTML = `<img src="${out.image_url}" style="max-width:100%;" />`;
+    });
+  </script>
+</body>
+</html>
