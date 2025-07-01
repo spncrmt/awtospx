@@ -1,38 +1,47 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>AI Image Generator</title>
-</head>
-<body>
-  <h2>Create Your Image</h2>
-  <form id="imageForm">
-    <input name="scene" placeholder="Scene" /><br />
-    <input name="style" placeholder="Style (e.g. oil painting)" /><br />
-    <input name="mood" placeholder="Mood (e.g. dramatic)" /><br />
-    <input name="characters" placeholder="Characters" /><br />
-    <input name="background" placeholder="Background" /><br />
-    <input name="color_palette" placeholder="Color Palette" /><br />
-    <input name="realism" placeholder="Realism (e.g. photorealistic)" /><br />
-    <button type="submit">Generate Image</button>
-  </form>
+<form id="imageForm">
+  <label>Scene: <input type="text" name="scene" required /></label><br />
+  <label>Style: <input type="text" name="style" required /></label><br />
+  <label>Mood: <input type="text" name="mood" required /></label><br />
+  <label>Characters: <input type="text" name="characters" required /></label><br />
+  <label>Background: <input type="text" name="background" required /></label><br />
+  <label>Colors (comma-separated): <input type="text" name="colors" required /></label><br />
+  <button type="submit">Generate Image</button>
+</form>
 
-  <div id="result"></div>
+<div id="imageResult"></div>
 
-  <script>
-    document.getElementById("imageForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(e.target).entries());
+<script>
+  const form = document.getElementById('imageForm');
+  const resultDiv = document.getElementById('imageResult');
 
-      const res = await fetch("https://your-n8n-webhook.com/webhook/image-gen", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      const out = await res.json();
-      document.getElementById("result").innerHTML = `<img src="${out.image_url}" style="max-width:100%;" />`;
+    const formData = new FormData(form);
+    const json = {
+      scene: formData.get('scene'),
+      style: formData.get('style'),
+      mood: formData.get('mood'),
+      background: formData.get('background'),
+      characters: formData.get('characters').split(',').map(s => s.trim()),
+      colors: formData.get('colors').split(',').map(c => c.trim()),
+    };
+
+    const response = await fetch("https://f8d5-2601-18f-880-740-4b9-b00c-1117-fa8.ngrok-free.app/webhook/generate-image", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(json)
     });
-  </script>
-</body>
-</html>
+
+    const data = await response.json();
+
+    // OPTIONAL: display returned image if your workflow returns a URL
+    if (data.image_url) {
+      resultDiv.innerHTML = `<img src="${data.image_url}" width="512"/>`;
+    } else {
+      resultDiv.innerText = "Image request sent!";
+    }
+  });
+</script>
